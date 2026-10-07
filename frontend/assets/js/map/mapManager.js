@@ -24,7 +24,7 @@ export class MapManager {
     L.control.zoom({ position: 'bottomright' }).addTo(this.map);
 
     // Dark Matter tile layer for futuristic fintech/EV look
-    this.darkLayer = L.tileLayer(`https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png?key=${import.meta.env.VITE_CARTO_API_KEY}`, {
+    this.darkLayer = L.tileLayer(`https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${import.meta.env.VITE_CARTO_API_KEY}`, {
       attribution: '&copy; <a href="https://carto.com/">CARTO</a>, &copy; <a href="https://openstreetmap.org">OSM</a>',
       subdomains: 'abcd',
       maxZoom: 19
