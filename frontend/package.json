@@ -1,0 +1,19 @@
+{
+  "name": "smartfuel-uzbekistan",
+  "version": "1.0.0",
+  "description": "SmartFuel Uzbekistan - Fuel & EV Navigator",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host --port 5173",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "leaflet": "^1.9.4",
+    "lucide": "^1.52.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.3"
+  }
+}

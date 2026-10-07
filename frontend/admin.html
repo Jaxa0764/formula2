@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartFuel UZ - Administrator Boshqaruv Markazi</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300F2FE'><rect x='3' y='3' width='18' height='18' rx='2'/></svg>" />
+  <link rel="stylesheet" href="./assets/css/admin.css" />
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo">SF</div>
+        <div>
+          <h3>SmartFuel UZ</h3>
+          <small class="text-muted">Admin Portal</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-tab-btn active" data-tab="overview">📊 Umumiy ko'rinish</button>
+        <button class="nav-tab-btn" data-tab="stations">📍 Zapravkalar boshqaruvi</button>
+        <button class="nav-tab-btn" data-tab="cng">🟢 CNG Metan nazorati</button>
+        <button class="nav-tab-btn" data-tab="prices">💰 Yoqilg'i narxlari</button>
+        <button class="nav-tab-btn" data-tab="ev">⚡ EV Zaryadlash</button>
+        <button class="nav-tab-btn" data-tab="reports">⚠️ Shikoyat va xatolar</button>
+        <button class="nav-tab-btn" data-tab="alerts">🚨 Tizim ogohlantirishlari</button>
+        <button class="nav-tab-btn" data-tab="audit">📝 Audit jurnali (Logs)</button>
+        <button class="nav-tab-btn" data-tab="users">👥 Foydalanuvchilar</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="/" class="back-to-web">← Asosiy xaritaga qaytish</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <h2 id="section-title">Boshqaruv paneli</h2>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span id="admin-profile-name" style="font-weight: 600;">Admin</span>
+          <span class="badge badge-green">Jonli efir (WebSocket)</span>
+        </div>
+      </header>
+
+      <div class="admin-body">
+        <!-- 1. Overview Section -->
+        <section id="section-overview" class="admin-section">
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <span class="kpi-title">Jami zapravkalar</span>
+              <div class="kpi-value cyan" id="stat-total-stations">0</div>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-title">Faol zapravkalar</span>
+              <div class="kpi-value green" id="stat-active-stations">0</div>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-title">Metan (CNG) mavjud</span>
+              <div class="kpi-value green" id="stat-cng-available">0</div>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-title">EV Zaryadlash stansiyalari</span>
+              <div class="kpi-value cyan" id="stat-ev-chargers">0</div>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-title">Past bosimli metan (&lt;140b)</span>
+              <div class="kpi-value amber" id="stat-low-pressure">0</div>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-title">Kutilayotgan shikoyatlar</span>
+              <div class="kpi-value rose" id="stat-pending-reports">0</div>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-title">Ro'yxatdan o'tganlar</span>
+              <div class="kpi-value" id="stat-user-count">0</div>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-title">O'rtacha metan bosimi</span>
+              <div class="kpi-value green" id="stat-avg-pressure">0 bar</div>
+            </div>
+          </div>
+
+          <div class="chart-panel">
+            <h4 style="margin-bottom: 12px;">📈 Yoqilg'i narxlari dinamikasi (Oxirgi 30 kun)</h4>
+            <div style="height: 300px; position: relative;">
+              <canvas id="priceTrendChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Stations Management Section -->
+        <section id="section-stations" class="admin-section hidden">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3>Shoxobchalar ro'yxati va holati</h3>
+            <button class="btn btn-primary" id="btn-add-station">+ Yangi zapravka qo'shish</button>
+          </div>
+
+          <div class="data-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nomi & Brend</th>
+                  <th>Shahar</th>
+                  <th>Manzil</th>
+                  <th>Holat</th>
+                  <th>Reyting</th>
+                  <th>Amallar</th>
+                </tr>
+              </thead>
+              <tbody id="stations-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 3. CNG Live Control -->
+        <section id="section-cng" class="admin-section hidden">
+          <h3 style="margin-bottom: 16px;">🟢 Real-vaqt Metan (CNG) Bosimi Boshqaruvi</h3>
+          <p class="text-muted" style="margin-bottom: 24px;">
+            Slayder yordamida zapravka bosimini o'zgartiring. Har bir o'zgarish barcha foydalanuvchilar ekranida darhol yangilanadi!
+          </p>
+          <div class="cng-cards-grid" id="cng-control-cards"></div>
+        </section>
+
+        <!-- 4. Fuel & Bulk Prices -->
+        <section id="section-prices" class="admin-section hidden">
+          <h3 style="margin-bottom: 16px;">💰 Yoqilg'i Narxlarini Ommaviy Yangilash</h3>
+          <div class="kpi-card" style="max-width: 500px;">
+            <form id="bulk-price-form" style="display: flex; flex-direction: column; gap: 14px;">
+              <div>
+                <label style="font-size: 0.85rem; color: #94A3B8;">Yoqilg'i turi</label>
+                <select id="bulk-fuel-type" class="custom-select" style="width: 100%; margin-top: 6px;"></select>
+              </div>
+              <div>
+                <label style="font-size: 0.85rem; color: #94A3B8;">Yangi narx (so'mda)</label>
+                <input type="number" id="bulk-price-input" class="custom-select" style="width: 100%; margin-top: 6px;" placeholder="10500" required />
+              </div>
+              <button type="submit" class="btn btn-primary">Barcha shoxobchalarda yangilash</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- 5. EV Chargers -->
+        <section id="section-ev" class="admin-section hidden">
+          <h3 style="margin-bottom: 16px;">⚡ EV Quvvatlash Stansiyalari Nazorati</h3>
+          <div id="ev-control-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
+        </section>
+
+        <!-- 6. Problem Reports -->
+        <section id="section-reports" class="admin-section hidden">
+          <h3 style="margin-bottom: 16px;">⚠️ Foydalanuvchilar Shikoyatlari va Xatolar</h3>
+          <div class="data-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Zapravka</th>
+                  <th>Muammo turi</th>
+                  <th>Tavsif</th>
+                  <th>Foydalanuvchi</th>
+                  <th>Holat</th>
+                  <th>Amal</th>
+                </tr>
+              </thead>
+              <tbody id="reports-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 7. Alerts -->
+        <section id="section-alerts" class="admin-section hidden">
+          <h3 style="margin-bottom: 16px;">🚨 Avtomatik Tizim Ogohlantirishlari</h3>
+          <div class="alerts-grid" id="alerts-feed"></div>
+        </section>
+
+        <!-- 8. Audit Logs -->
+        <section id="section-audit" class="admin-section hidden">
+          <h3 style="margin-bottom: 16px;">📝 Administrator Audit Jurnali (Kim, Qachon, Nimani o'zgartirdi)</h3>
+          <div class="data-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Vaqt</th>
+                  <th>Foydalanuvchi</th>
+                  <th>Amal</th>
+                  <th>Ob'ekt</th>
+                  <th>Yangi qiymatlar</th>
+                </tr>
+              </thead>
+              <tbody id="audit-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 9. Users & Roles -->
+        <section id="section-users" class="admin-section hidden">
+          <h3 style="margin-bottom: 16px;">👥 Foydalanuvchilar va Ruxsatlar (RBAC)</h3>
+          <div class="data-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Ism</th>
+                  <th>Email</th>
+                  <th>Telefon</th>
+                  <th>Joriy rol</th>
+                  <th>Rolni o'zgartirish</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Station Form Modal -->
+    <div id="station-form-modal" class="modal-overlay hidden">
+      <div class="modal-card" style="width: 560px;">
+        <div class="modal-header">
+          <h3>Zapravka ma'lumotlari</h3>
+          <button class="admin-modal-close">✕</button>
+        </div>
+        <form id="station-form">
+          <input type="hidden" id="station-form-id" />
+          <div class="form-group">
+            <label>Nomi</label>
+            <input type="text" id="form-st-name" required />
+          </div>
+          <div class="form-group">
+            <label>Brend</label>
+            <input type="text" id="form-st-brand" placeholder="UNG Petro, TokBor, Carvon Oil" />
+          </div>
+          <div class="form-group">
+            <label>Shahar</label>
+            <select id="form-st-city" class="custom-select">
+              <option value="Tashkent">Toshkent</option>
+              <option value="Samarkand">Samarqand</option>
+              <option value="Bukhara">Buxoro</option>
+              <option value="Fergana">Farg'ona</option>
+              <option value="Andijan">Andijon</option>
+              <option value="Namangan">Namangan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Manzil</label>
+            <input type="text" id="form-st-address" required />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label>Kenglik (Latitude)</label>
+              <input type="number" step="any" id="form-st-lat" required />
+            </div>
+            <div class="form-group">
+              <label>Uzunlik (Longitude)</label>
+              <input type="number" step="any" id="form-st-lon" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Ish vaqti</label>
+            <input type="text" id="form-st-hours" value="24/7" />
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin: 8px 0;">
+            <input type="checkbox" id="form-st-open" checked />
+            <label for="form-st-open">Zapravka ochiq va faol</label>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top: 12px;">Saqlash</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Login Overlay for Unauthenticated Admins -->
+    <div id="admin-login-overlay" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Administrator kirishi</h3>
+        </div>
+        <form id="admin-login-form">
+          <div class="form-group">
+            <label>Admin Email</label>
+            <input type="email" id="admin-email" value="admin@smartfuel.uz" required />
+          </div>
+          <div class="form-group">
+            <label>Parol</label>
+            <input type="password" id="admin-password" value="admin123" required />
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top: 14px;">Boshqaruvga kirish</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./assets/js/admin/adminApp.js"></script>
+</body>
+</html>

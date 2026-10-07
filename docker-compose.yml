@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: smartfuel_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: smartfuel_user
+      POSTGRES_PASSWORD: smartfuel_secure_password_2026
+      POSTGRES_DB: smartfuel_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: smartfuel_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://smartfuel_user:smartfuel_secure_password_2026@db:5432/smartfuel_db
+      SECRET_KEY: super-secret-production-key-smartfuel-uzbekistan-2026
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smartfuel_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
+volumes:
+  postgres_data:
