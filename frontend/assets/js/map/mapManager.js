@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 export class MapManager {
   constructor(elementId, options = {}) {
     this.elementId = elementId;
-    this.onStationClick = options.onStationClick || (() => {});
+    this.onStationClick = options.onStationClick || (() => { });
     this.map = null;
     this.markersGroup = null;
     this.routePolyline = null;
@@ -24,7 +24,7 @@ export class MapManager {
     L.control.zoom({ position: 'bottomright' }).addTo(this.map);
 
     // Dark Matter tile layer for futuristic fintech/EV look
-    this.darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    this.darkLayer = L.tileLayer('`https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png?key=${import.meta.env.VITE_CARTO_API_KEY}`,', {
       attribution: '&copy; <a href="https://carto.com/">CARTO</a>, &copy; <a href="https://openstreetmap.org">OSM</a>',
       subdomains: 'abcd',
       maxZoom: 19
